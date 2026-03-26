@@ -138,6 +138,13 @@ async function main() {
     },
   ];
 
+  // Skip seeding if topics already exist
+  const existingTopics = await prisma.topic.count();
+  if (existingTopics > 0) {
+    console.log(`Seed skipped — ${existingTopics} topics already exist`);
+    return;
+  }
+
   for (const topicData of topicsData) {
     const { questions, ...topicFields } = topicData;
     const topic = await prisma.topic.create({ data: topicFields });
@@ -148,7 +155,7 @@ async function main() {
     }
   }
 
-  console.log('Seed completed successfully');
+  console.log('Seed completed — 4 topics with 80 questions created');
 }
 
 main()

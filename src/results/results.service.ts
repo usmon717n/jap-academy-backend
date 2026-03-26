@@ -26,7 +26,7 @@ export class ResultsService {
       isCorrect: boolean;
     }> = [];
 
-    questions.forEach((q, index) => {
+    questions.forEach((q: { id: string; correct: number }, index: number) => {
       const userAnswer = data.answers[String(index)];
       const isCorrect = userAnswer === q.correct;
       if (isCorrect) correctCount++;

@@ -55,7 +55,7 @@ export class NotificationsService {
 
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
 
-    const notifications = students.map((student) => ({
+    const notifications = students.map((student: { id: string }) => ({
       userId: student.id,
       title: 'Test vaqti',
       message: randomMessage,

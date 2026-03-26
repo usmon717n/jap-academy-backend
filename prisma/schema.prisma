@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  results       Result[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Topic {
+  id        String   @id @default(uuid())
+  name      String
+  symbol    String   @db.VarChar(4)
+  number    String   @db.VarChar(4)
+  color     String   @db.VarChar(10)
+  isActive  Boolean  @default(true) @map("is_active")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  questions Question[]
+  results   Result[]
+
+  @@map("topics")
+}
+
+model Question {
+  id       String @id @default(uuid())
+  text     String
+  optionA  String @map("option_a")
+  optionB  String @map("option_b")
+  optionC  String @map("option_c")
+  optionD  String @map("option_d")
+  correct  Int    @db.SmallInt
+  topicId  String @map("topic_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@map("questions")
+}
+
+model Result {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  topicId       String   @map("topic_id")
+  totalQuestions Int      @map("total_questions")
+  correctCount  Int      @map("correct_count")
+  percentage    Float
+  timeSpent     Int      @map("time_spent")
+  answers       Json
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@map("results")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  title     String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  fullName  String   @map("full_name")
+  phone     String
+  message   String   @default("")
+  isHandled Boolean  @default(false) @map("is_handled")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contacts")
+}

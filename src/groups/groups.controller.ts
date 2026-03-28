@@ -110,4 +110,17 @@ export class GroupsController {
     await this.groupsService.findById(id, req.user.sub, req.user.role);
     return this.groupsService.removeTopic(id, topicId);
   }
+
+  // Student: join group by code (any logged-in user)
+  @Post('join')
+  async joinByCode(@Request() req: any, @Body() body: { code: string }) {
+    return this.groupsService.joinByCode(req.user.sub, body.code);
+  }
+
+  // Admin: regenerate join code
+  @UseGuards(AdminGuard)
+  @Post(':id/regenerate-code')
+  async regenerateCode(@Param('id') id: string) {
+    return this.groupsService.regenerateCode(id);
+  }
 }

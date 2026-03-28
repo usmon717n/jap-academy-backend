@@ -1,9 +1,28 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class GroupsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  // Generate unique 6-char join code like "KM7X3F"
+  private generateCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  private async generateUniqueCode(): Promise<string> {
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const code = this.generateCode();
+      const existing = await this.prisma.group.findUnique({ where: { joinCode: code } });
+      if (!existing) return code;
+    }
+    throw new BadRequestException('Kod yaratishda xatolik, qayta urinib ko\'ring');
+  }
 
   // ─── Admin: all groups ───
   async findAll() {
@@ -61,8 +80,9 @@ export class GroupsService {
 
   // ─── Admin: create group ───
   async create(data: { name: string; color?: string }) {
+    const joinCode = await this.generateUniqueCode();
     return this.prisma.group.create({
-      data: { name: data.name, color: data.color || '#ea580c' },
+      data: { name: data.name, color: data.color || '#ea580c', joinCode },
     });
   }
 
@@ -158,6 +178,39 @@ export class GroupsService {
       },
     });
     return memberships.map((m: any) => m.group);
+  }
+
+  // ─── Student: join group by code ───
+  async joinByCode(userId: string, code: string) {
+    const group = await this.prisma.group.findUnique({
+      where: { joinCode: code.toUpperCase().trim() },
+      select: { id: true, name: true, color: true, isActive: true },
+    });
+    if (!group) throw new NotFoundException('Guruh topilmadi. Kodni tekshiring.');
+    if (!group.isActive) throw new BadRequestException('Bu guruh faol emas');
+
+    // Check if already a member
+    const existing = await this.prisma.groupMember.findUnique({
+      where: { groupId_userId: { groupId: group.id, userId } },
+    });
+    if (existing) throw new BadRequestException('Siz allaqachon bu guruhga a\'zosiz');
+
+    await this.prisma.groupMember.create({
+      data: { groupId: group.id, userId },
+    });
+
+    return { message: `"${group.name}" guruhiga muvaffaqiyatli qo'shildingiz!`, group };
+  }
+
+  // ─── Admin: regenerate join code ───
+  async regenerateCode(groupId: string) {
+    await this.ensureExists(groupId);
+    const newCode = await this.generateUniqueCode();
+    return this.prisma.group.update({
+      where: { id: groupId },
+      data: { joinCode: newCode },
+      select: { id: true, joinCode: true },
+    });
   }
 
   private async ensureExists(id: string) {

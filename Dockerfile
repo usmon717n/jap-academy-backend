@@ -32,4 +32,4 @@ COPY --from=builder /app/prisma ./prisma
 ENV NODE_ENV=production
 EXPOSE 4000
 
-CMD ["sh", "-c", "npx prisma db push --skip-generate && npx ts-node prisma/seed.ts; node dist/main"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate --accept-data-loss && npx ts-node prisma/seed.ts; node dist/main"]

@@ -30,7 +30,7 @@ export class AuthService {
 
     return {
       accessToken: token,
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, phone: user.phone, role: user.role },
     };
   }
 
@@ -49,18 +49,26 @@ export class AuthService {
 
     return {
       accessToken: token,
-      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, phone: user.phone, role: user.role },
     };
   }
 
   async validateUser(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, firstName: true, lastName: true, role: true },
+      select: { id: true, email: true, firstName: true, lastName: true, phone: true, role: true },
     });
     if (!user) {
       throw new UnauthorizedException();
     }
     return user;
+  }
+
+  async updateProfile(userId: string, data: { firstName?: string; lastName?: string; phone?: string }) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: { id: true, email: true, firstName: true, lastName: true, phone: true, role: true },
+    });
   }
 }

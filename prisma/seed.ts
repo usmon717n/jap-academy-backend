@@ -156,6 +156,39 @@ async function main() {
   }
 
   console.log('Seed completed — 4 topics with 80 questions created');
+
+  // Seed default site content
+  const defaults: Record<string, any> = {
+    about_results: [
+      { image: 'https://placehold.co/600x400/ea580c/white?text=Natija+1', alt: 'Natija 1' },
+      { image: 'https://placehold.co/600x400/f97316/white?text=Natija+2', alt: 'Natija 2' },
+      { image: 'https://placehold.co/600x400/fb923c/white?text=Natija+3', alt: 'Natija 3' },
+    ],
+    about_students: [
+      { name: 'Aziza Karimova', desc: 'DTM 189 ball. Kimyo fanidan eng yuqori natija.', image: 'https://placehold.co/200x200/ea580c/white?text=AK' },
+      { name: 'Jasur Toshmatov', desc: 'Olimpiada g\'olibi. Respublika 1-o\'rin.', image: 'https://placehold.co/200x200/f97316/white?text=JT' },
+      { name: 'Malika Rahimova', desc: 'Toshkent Tibbiyot — grant asosida o\'qimoqda.', image: 'https://placehold.co/200x200/fb923c/white?text=MR' },
+      { name: 'Bobur Aliyev', desc: 'Xalqaro olimpiada ishtirokchisi.', image: 'https://placehold.co/200x200/fdba74/white?text=BA' },
+      { name: 'Nilufar Saidova', desc: 'Farmatsevtika fakulteti talabasi.', image: 'https://placehold.co/200x200/c2410c/white?text=NS' },
+    ],
+    useful_videos: [
+      { title: 'JAP Academy haqida', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+      { title: 'O\'quvchilarimiz fikrlari', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+    ],
+    footer_socials: {
+      telegram: 'https://t.me/japacademy',
+      instagram: 'https://instagram.com/japacademy',
+      youtube: 'https://youtube.com/@japacademy',
+    },
+    footer_location: {
+      address: 'Toshkent sh., Chilonzor tumani, 9-mavze',
+      mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2996.123!2d69.2401!3d41.2995',
+    },
+  };
+  for (const [key, value] of Object.entries(defaults)) {
+    await prisma.siteContent.upsert({ where: { key }, create: { key, value: value as any }, update: {} });
+  }
+  console.log('Site content seeded');
 }
 
 main()

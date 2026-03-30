@@ -163,3 +163,20 @@ model Contact {
 
   @@map("contacts")
 }
+
+model SiteContent {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_content")
+}
+
+model SiteContent {
+  id    String @id @default("main")
+  data  Json   @default("{}")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_content")
+}

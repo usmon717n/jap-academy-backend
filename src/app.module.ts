@@ -10,6 +10,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { GroupsModule } from './groups/groups.module';
 import { TeachersModule } from './teachers/teachers.module';
+import { SiteContentModule } from './site-content/site-content.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { TeachersModule } from './teachers/teachers.module';
     ContactsModule,
     GroupsModule,
     TeachersModule,
+    SiteContentModule,
   ],
 })
 export class AppModule {}

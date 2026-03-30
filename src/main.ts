@@ -16,10 +16,13 @@ async function bootstrap() {
         process.env.FRONTEND_URL,
       ].filter(Boolean);
 
-      // Allow exact match or any Vercel preview URL
+      // Allow exact match or any Vercel preview URL or custom domain
       if (
         allowed.includes(origin) ||
-        origin.endsWith('.vercel.app')
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('jap-academy.uz') ||
+        origin === 'https://jap-academy.uz' ||
+        origin === 'https://www.jap-academy.uz'
       ) {
         return callback(null, true);
       }

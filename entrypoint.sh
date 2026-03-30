@@ -1,17 +1,19 @@
 #!/bin/sh
-set -e
 
 echo "=== JAP Academy Backend Starting ==="
-
-# Try normal db push first
 echo "Syncing database schema..."
-if npx prisma db push --skip-generate 2>/dev/null; then
-  echo "Schema synced successfully"
+
+npx prisma db push --skip-generate 2>&1
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+  echo "Normal sync failed (exit $RESULT), forcing reset..."
+  npx prisma db push --force-reset --skip-generate 2>&1
+  echo "Schema reset done, seeding..."
+  npx ts-node prisma/seed.ts 2>&1 || echo "Seed warning"
 else
-  echo "Normal sync failed, forcing schema reset..."
-  npx prisma db push --force-reset --skip-generate
-  echo "Schema reset complete, seeding data..."
-  npx ts-node prisma/seed.ts || echo "Seed skipped or failed"
+  echo "Schema synced OK"
+  npx ts-node prisma/seed.ts 2>&1 || echo "Seed warning"
 fi
 
 echo "Starting server..."
